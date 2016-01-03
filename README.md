@@ -84,5 +84,7 @@ Where description here refers to the type of the property.
 * Add option for exlusion / inclusion of completion types
 * Add option for specifying editor type (Sublime Text, Atom, Textmate, etc)
 * Add visual progress indication for processing
+* Add Unit Tests for each type of snippet/completion file
+* Consider renaming project name
 
 
