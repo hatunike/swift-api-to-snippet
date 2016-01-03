@@ -13,7 +13,7 @@ if Process.arguments.count == 1 {
     let swiftFiles = enumerator.allObjects.filter(){ $0.pathExtension == "swift" }
 
     SublimeSnippet.processSwiftFiles(swiftFiles as! [String], sourcePath:sourcePath, outputPath:"\(path)/snippets/")
-
+    
 } else if Process.arguments.count == 3 {
     print("parsing sourceDirectory, writing to outputDirectory")
 } else {
