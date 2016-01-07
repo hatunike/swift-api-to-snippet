@@ -1,5 +1,24 @@
 import Foundation
 
+struct Snippet {
+	let name:String
+	let description:String
+	let paramaters:[String]
+	let snippetType:SnippetType
+}
+
+enum SnippetType {
+	case ClassToken
+	case StructToken
+	case EnumToken
+	case Constant
+	case Variable
+	case InstanceMethod
+	case InitializationMethod
+	case StaticMethod
+	case ClassMethod
+}
+
 public class SublimeSnippet {
 	class func createSnippetText(with inputText:String, textDescription:String = "") -> String {
 		return "\(SublimeSnippet.snippet().start)" +
@@ -45,6 +64,26 @@ public class SublimeSnippet {
 				"\(SublimeSnippet.snippet().end)"
 
 		return snippet
+	}
+
+	class func completionSnippet(snippets:[Snippet]) -> String {
+		var comp = "{\n" + 
+						 "\"scope\": \"source.swift\",\n" +
+						 "\"completions\":\n [ \n"
+			 for snippet in snippets {
+			 	switch snippet.snippetType {
+			 		case .Constant, .Variable, .ClassToken, .EnumToken, .StructToken:
+			 			comp += "{ \"trigger\": \"\(snippet.name)\", \"contents\": \"\(snippet.name)\"},"
+			 		default:
+			 			break
+
+			 	}
+			 }
+			 comp = String(comp.characters.dropLast()) //remove unnecessary comma
+
+			comp += "]\n }\n"
+
+		return comp 
 	}
 
 	class func paramSnippet(param:String, paramNum:Int) -> String {
@@ -173,6 +212,14 @@ public class SublimeSnippet {
                 print("failed to open file \(swiftFile)")
             }
         }
+    }
+
+    class func convertSwiftFilesToSnippets(files:[String], sourcePath:String, outputPath:String) -> [Snippet] {
+    	return []
+    }
+
+    class func createCompletionFile(snippets:[Snippet], sourcePath:String, outputPath:String) {
+
     }
 }
 
