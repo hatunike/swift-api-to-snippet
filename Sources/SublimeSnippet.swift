@@ -28,8 +28,7 @@ public class SublimeSnippet {
 				"\(SublimeSnippet.tabTrigger(inputText))" +
 				"\(SublimeSnippet.scope())" + 
 				"\(SublimeSnippet.descriptionText(textDescription))" +
-				"\(SublimeSnippet.snippet().end)"
-				
+				"\(SublimeSnippet.snippet().end)"				
 	}
 
 	class func createFuncSnippetText(with name:String, parameters:[String], returnType:String) -> String {
@@ -94,31 +93,38 @@ public class SublimeSnippet {
 		}
 	}
 
-	class func snippetClassFileName(name:String) -> String{
+	class func snippetClassFileName(name:String) -> String {
+
 		return SublimeSnippet.snippetFileName(with: "class", name:name)
 	}
 
-	class func snippetFileName(with type:String, name:String) -> String{
+	class func snippetFileName(with type:String, name:String) -> String {
+
 		return "\(name.stringByReplacingOccurrencesOfString("<", withString: "").stringByReplacingOccurrencesOfString(">", withString: "")).sublime-snippet"
 	}
 
 	class func snippet() -> (start:String, end:String) {
+		
 		return ("<snippet>\n", "</snippet>")
 	}
 
 	class func content() -> (start:String, end:String) {
+		
 		return ("\t<content><![CDATA[\n", "]]></content>\n")
 	}
 
 	class func tabTrigger(trigger:String) -> String {
+		
 		return "\t<tabTrigger>\(trigger)</tabTrigger>\n"
 	}
 
 	class func scope() -> String {
+		
 		return "\t<scope>source.swift</scope>"
 	}
 	
 	class func descriptionText(descriptiveText:String) -> String {
+		
 		return "\t<description>\(descriptiveText)</description>"
 	}
 
@@ -215,11 +221,46 @@ public class SublimeSnippet {
     }
 
     class func convertSwiftFilesToSnippets(files:[String], sourcePath:String, outputPath:String) -> [Snippet] {
-    	return []
+    	var snippets = [Snippet]()
+
+    	for swiftFile in files {
+            let fullFilePath = "\(sourcePath)/\(swiftFile)"
+            if let fileTxt = File.open(fullFilePath) {
+                let blocks = fileTxt.parsePrimaryCodeBlocks()
+                for (_, _) in blocks {
+                	for token in fileTxt.classTokens() {
+                		let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.ClassToken)
+              			snippets.append(snip)
+                    }
+                    
+                    for token in fileTxt.enumTokens() {
+                        let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.EnumToken)
+              			snippets.append(snip)
+                    }
+
+                    for token in fileTxt.structTokens() {
+                        let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.StructToken)
+              			snippets.append(snip)
+                    }
+
+                    for (key, value) in fileTxt.variableTokens() {
+                        let snip = Snippet(name:key, description:value, paramaters:[], snippetType:.Variable)
+              			snippets.append(snip)
+                    }
+
+                    for (key, value) in fileTxt.constantTokens() {
+                        let snip = Snippet(name:key, description:value, paramaters:[], snippetType:.Constant)
+              			snippets.append(snip)
+                    }
+                    
+                }
+            }
+        }
+    	return snippets
     }
 
     class func createCompletionFile(snippets:[Snippet], sourcePath:String, outputPath:String) {
-
+    	File.save("\(outputPath)/testing.sublime-completions", SublimeSnippet.completionSnippet(snippets))
     }
 }
 

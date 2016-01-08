@@ -24,4 +24,8 @@ class File {
         return "\(basePath)/\(SublimeSnippet.snippetClassFileName(fileName).removeUnsafeSublimeTextCharacters())"
     }
 
+    class func filePathForCompletionFile(basePath:String) -> String {
+        return "\(basePath)/Testing.snippet-completion"
+    }
+
 }
