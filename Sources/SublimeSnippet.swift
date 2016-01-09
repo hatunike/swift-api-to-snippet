@@ -227,7 +227,7 @@ public class SublimeSnippet {
             let fullFilePath = "\(sourcePath)/\(swiftFile)"
             if let fileTxt = File.open(fullFilePath) {
                 let blocks = fileTxt.parsePrimaryCodeBlocks()
-                for (_, _) in blocks {
+                for (name, code) in blocks {
                 	for token in fileTxt.classTokens() {
                 		let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.ClassToken)
               			snippets.append(snip)
@@ -250,6 +250,28 @@ public class SublimeSnippet {
 
                     for (key, value) in fileTxt.constantTokens() {
                         let snip = Snippet(name:key, description:value, paramaters:[], snippetType:.Constant)
+              			snippets.append(snip)
+                    }
+
+                    for funcData:FuncData in code.memberFuncParserTokens() {
+
+                    	let snip = Snippet(name:funcData.name, description:"func \(name) -> \(funcData.returnType)", paramaters:funcData.params, snippetType:.InstanceMethod)
+              			snippets.append(snip)         
+                    }
+
+                    for funcData:FuncData in code.classFuncTokens() {
+                    	let snip = Snippet(name:funcData.name, description:"class \(name) -> \(funcData.returnType)", paramaters:funcData.params, snippetType:.ClassMethod)
+              			snippets.append(snip)          
+                    }
+
+                    for funcData:FuncData in code.staticFuncTokens() {
+                    	let snip = Snippet(name:funcData.name, description:"static \(name) -> \(funcData.returnType)", paramaters:funcData.params, snippetType:.StaticMethod)
+              			snippets.append(snip)          
+                    }
+
+                    for funcData:FuncData in code.initializerTokens() {
+                        let descriptionIdentifier = funcData.params.map({param in "\(SublimeSnippet.harvestParamExternalName(param, isFirstParam:false))"}).joinWithSeparator(" ")
+                        let snip = Snippet(name:funcData.name, description:descriptionIdentifier, paramaters:funcData.params, snippetType:.StaticMethod)
               			snippets.append(snip)
                     }
                     

@@ -13,13 +13,9 @@ if Process.arguments.count == 1 {
     let enumerator:NSDirectoryEnumerator = filemanager.enumeratorAtPath(sourcePath)!
     let swiftFiles = enumerator.allObjects.filter(){ $0.pathExtension == "swift" }
 
-    //comment out to stop snippet files
-    SublimeSnippet.processSwiftFiles(swiftFiles as! [String], sourcePath:sourcePath, outputPath:"\(path)/snippets/")
-    
-    /* uncomment to create a single completion file (not finished)
     let snippets = SublimeSnippet.convertSwiftFilesToSnippets(swiftFiles as! [String], sourcePath:sourcePath, outputPath:"\(path)/snippets/")
     SublimeSnippet.createCompletionFile(snippets, sourcePath:sourcePath, outputPath:"\(path)/snippets/")
-    */
+    
 
 } else if Process.arguments.count >= 3 {
     print("parsing sourceDirectory, writing to outputDirectory")
