@@ -3,7 +3,7 @@ import Foundation
 struct Snippet {
 	let name:String
 	let description:String
-	let paramaters:[String]
+	let parameters:[String]
 	let snippetType:SnippetType
 }
 
@@ -72,10 +72,30 @@ public class SublimeSnippet {
 			 for snippet in snippets {
 			 	switch snippet.snippetType {
 			 		case .Constant, .Variable, .ClassToken, .EnumToken, .StructToken:
-			 			comp += "{ \"trigger\": \"\(snippet.name)\", \"contents\": \"\(snippet.name)\"},"
-			 		default:
-			 			break
+			 			comp += "{ \"trigger\": \"\(snippet.name) \\t \(snippet.description)\", \"contents\": \"\(snippet.name)\" },"
+			 		case .InstanceMethod, .ClassMethod, .StaticMethod, .InitializationMethod:
+			 			comp += "{ \"trigger\": \"\(snippet.name.removeGreaterThanLessThan())"
+			 			comp += " \\t \(snippet.description)\" ,"
+			 			comp += " \"contents\": \"\(snippet.name.removeGreaterThanLessThan().removeParenthesis())("
+			 			if snippet.parameters.count == 0 {
+							comp = comp + ")\" },"
+						} else {
+							for index in 1...snippet.parameters.count {
+								let param = snippet.parameters[index-1]
 
+								comp = comp + SublimeSnippet.paramSnippet(param, paramNum:index).removeGreaterThanLessThan()
+
+								if index != snippet.parameters.count {
+									if snippet.parameters.count != 1 {
+										comp = comp + ", "
+									} else {
+										comp = comp + ")"
+									}
+								} else {
+									comp = comp + ")\" },"
+								}
+							}
+						}
 			 	}
 			 }
 			 comp = String(comp.characters.dropLast()) //remove unnecessary comma
@@ -86,6 +106,7 @@ public class SublimeSnippet {
 	}
 
 	class func paramSnippet(param:String, paramNum:Int) -> String {
+
 		if paramNum == 1 {
 			return "\(SublimeSnippet.harvestParamExternalName(param, isFirstParam:true))${\(paramNum):\(SublimeSnippet.harvestParamType(param))}"
 		} else {
@@ -229,49 +250,49 @@ public class SublimeSnippet {
                 let blocks = fileTxt.parsePrimaryCodeBlocks()
                 for (name, code) in blocks {
                 	for token in fileTxt.classTokens() {
-                		let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.ClassToken)
+                		let snip = Snippet(name:token, description:token, parameters:[], snippetType:.ClassToken)
               			snippets.append(snip)
                     }
                     
                     for token in fileTxt.enumTokens() {
-                        let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.EnumToken)
+                        let snip = Snippet(name:token, description:token, parameters:[], snippetType:.EnumToken)
               			snippets.append(snip)
                     }
 
                     for token in fileTxt.structTokens() {
-                        let snip = Snippet(name:token, description:token, paramaters:[], snippetType:.StructToken)
+                        let snip = Snippet(name:token, description:token, parameters:[], snippetType:.StructToken)
               			snippets.append(snip)
                     }
 
                     for (key, value) in fileTxt.variableTokens() {
-                        let snip = Snippet(name:key, description:value, paramaters:[], snippetType:.Variable)
+                        let snip = Snippet(name:key, description:value, parameters:[], snippetType:.Variable)
               			snippets.append(snip)
                     }
 
                     for (key, value) in fileTxt.constantTokens() {
-                        let snip = Snippet(name:key, description:value, paramaters:[], snippetType:.Constant)
+                        let snip = Snippet(name:key, description:value, parameters:[], snippetType:.Constant)
               			snippets.append(snip)
                     }
 
                     for funcData:FuncData in code.memberFuncParserTokens() {
 
-                    	let snip = Snippet(name:funcData.name, description:"func \(name) -> \(funcData.returnType)", paramaters:funcData.params, snippetType:.InstanceMethod)
+                    	let snip = Snippet(name:funcData.name, description:"func \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.InstanceMethod)
               			snippets.append(snip)         
                     }
 
                     for funcData:FuncData in code.classFuncTokens() {
-                    	let snip = Snippet(name:funcData.name, description:"class \(name) -> \(funcData.returnType)", paramaters:funcData.params, snippetType:.ClassMethod)
+                    	let snip = Snippet(name:funcData.name, description:"class \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.ClassMethod)
               			snippets.append(snip)          
                     }
 
                     for funcData:FuncData in code.staticFuncTokens() {
-                    	let snip = Snippet(name:funcData.name, description:"static \(name) -> \(funcData.returnType)", paramaters:funcData.params, snippetType:.StaticMethod)
+                    	let snip = Snippet(name:funcData.name, description:"static \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.StaticMethod)
               			snippets.append(snip)          
                     }
 
                     for funcData:FuncData in code.initializerTokens() {
                         let descriptionIdentifier = funcData.params.map({param in "\(SublimeSnippet.harvestParamExternalName(param, isFirstParam:false))"}).joinWithSeparator(" ")
-                        let snip = Snippet(name:funcData.name, description:descriptionIdentifier, paramaters:funcData.params, snippetType:.StaticMethod)
+                        let snip = Snippet(name:name, description:descriptionIdentifier, parameters:funcData.params, snippetType:.InitializationMethod)
               			snippets.append(snip)
                     }
                     
@@ -301,7 +322,11 @@ extension String {
 	}
 
 	func escapeGreaterThanLessThan() -> String {
-		return self.stringByReplacingOccurrencesOfString("<", withString:"\\<").stringByReplacingOccurrencesOfString(">", withString:"\\>")
+		return self.stringByReplacingOccurrencesOfString("<", withString:"\\\\<").stringByReplacingOccurrencesOfString(">", withString:"\\\\>")
+	}
+
+	func removeGreaterThanLessThan() -> String {
+		return "\(self.stringByReplacingOccurrencesOfString("<", withString: "").stringByReplacingOccurrencesOfString(">", withString: "")))"
 	}
 
 	public func removeUnsafeSublimeTextCharacters() -> String {
