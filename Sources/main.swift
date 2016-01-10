@@ -12,11 +12,14 @@ if Process.arguments.count == 1 {
     let path = NSFileManager.defaultManager().currentDirectoryPath
     let enumerator:NSDirectoryEnumerator = filemanager.enumeratorAtPath(sourcePath)!
     let swiftFiles = enumerator.allObjects.filter(){ $0.pathExtension == "swift" }
-
-    let snippets = SublimeSnippet.convertSwiftFilesToSnippets(swiftFiles as! [String], sourcePath:sourcePath, outputPath:"\(path)/snippets/")
-    SublimeSnippet.createCompletionFile(snippets, sourcePath:sourcePath, outputPath:"\(path)/snippets/")
+    if let completionFileName = sourcePath.componentsSeparatedByString("/").last {
+        let snippets = SublimeSnippet.convertSwiftFilesToSnippets(swiftFiles as! [String], sourcePath:sourcePath, outputPath:"\(path)/snippets/")
+        SublimeSnippet.createCompletionFile(completionFileName, snippets:snippets, sourcePath:sourcePath, outputPath:"\(path)/snippets/")
+    } else {
+        print("unable to obtain a name from the last path component in the sourcePath")
+    }
     
-
+    
 } else if Process.arguments.count >= 3 {
     print("parsing sourceDirectory, writing to outputDirectory")
     let outputPath = Process.arguments[2]

@@ -1,10 +1,17 @@
 import Foundation
 
-struct Snippet {
+struct Snippet : Hashable {
 	let name:String
 	let description:String
 	let parameters:[String]
 	let snippetType:SnippetType
+	var hashValue: Int {
+      return "\(name) \(description) \(parameters)".hashValue
+  	}	
+}
+
+func ==(lhs: Snippet, rhs: Snippet) -> Bool {
+  return lhs.hashValue == rhs.hashValue
 }
 
 enum SnippetType {
@@ -65,7 +72,7 @@ public class SublimeSnippet {
 		return snippet
 	}
 
-	class func completionSnippet(snippets:[Snippet]) -> String {
+	class func completionSnippet(snippets:Set<Snippet>) -> String {
 		var comp = "{\n" + 
 						 "\"scope\": \"source.swift\",\n" +
 						 "\"completions\":\n [ \n"
@@ -241,69 +248,69 @@ public class SublimeSnippet {
         }
     }
 
-    class func convertSwiftFilesToSnippets(files:[String], sourcePath:String, outputPath:String) -> [Snippet] {
-    	var snippets = [Snippet]()
+    class func convertSwiftFilesToSnippets(files:[String], sourcePath:String, outputPath:String) -> Set<Snippet> {
+    	var snippets = Set<Snippet>()
 
     	for swiftFile in files {
             let fullFilePath = "\(sourcePath)/\(swiftFile)"
             if let fileTxt = File.open(fullFilePath) {
                 let blocks = fileTxt.parsePrimaryCodeBlocks()
                 for (name, code) in blocks {
+                	
                 	for token in fileTxt.classTokens() {
                 		let snip = Snippet(name:token, description:token, parameters:[], snippetType:.ClassToken)
-              			snippets.append(snip)
+              			snippets.insert(snip)
                     }
                     
                     for token in fileTxt.enumTokens() {
                         let snip = Snippet(name:token, description:token, parameters:[], snippetType:.EnumToken)
-              			snippets.append(snip)
+              			snippets.insert(snip)
                     }
 
                     for token in fileTxt.structTokens() {
                         let snip = Snippet(name:token, description:token, parameters:[], snippetType:.StructToken)
-              			snippets.append(snip)
+              			snippets.insert(snip)
                     }
-
+					
                     for (key, value) in fileTxt.variableTokens() {
                         let snip = Snippet(name:key, description:value, parameters:[], snippetType:.Variable)
-              			snippets.append(snip)
+              			snippets.insert(snip)
                     }
 
                     for (key, value) in fileTxt.constantTokens() {
                         let snip = Snippet(name:key, description:value, parameters:[], snippetType:.Constant)
-              			snippets.append(snip)
+              			snippets.insert(snip)
                     }
 
                     for funcData:FuncData in code.memberFuncParserTokens() {
 
                     	let snip = Snippet(name:funcData.name, description:"func \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.InstanceMethod)
-              			snippets.append(snip)         
+              			snippets.insert(snip)         
                     }
 
                     for funcData:FuncData in code.classFuncTokens() {
                     	let snip = Snippet(name:funcData.name, description:"class \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.ClassMethod)
-              			snippets.append(snip)          
+              			snippets.insert(snip)          
                     }
-
+                      
                     for funcData:FuncData in code.staticFuncTokens() {
                     	let snip = Snippet(name:funcData.name, description:"static \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.StaticMethod)
-              			snippets.append(snip)          
+              			snippets.insert(snip)          
                     }
-
+					
                     for funcData:FuncData in code.initializerTokens() {
                         let descriptionIdentifier = funcData.params.map({param in "\(SublimeSnippet.harvestParamExternalName(param, isFirstParam:false))"}).joinWithSeparator(" ")
                         let snip = Snippet(name:name, description:descriptionIdentifier, parameters:funcData.params, snippetType:.InitializationMethod)
-              			snippets.append(snip)
-                    }
-                    
+              			snippets.insert(snip)
+                    } 
                 }
             }
         }
     	return snippets
     }
 
-    class func createCompletionFile(snippets:[Snippet], sourcePath:String, outputPath:String) {
-    	File.save("\(outputPath)/testing.sublime-completions", SublimeSnippet.completionSnippet(snippets))
+    class func createCompletionFile(filename:String, snippets:Set<Snippet>, sourcePath:String, outputPath:String) {
+    	File.save("\(outputPath)/\(filename).sublime-completions", SublimeSnippet.completionSnippet(snippets))
     }
 }
 

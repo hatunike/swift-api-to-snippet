@@ -24,28 +24,30 @@ struct FuncData {
 extension String {
 	//Constucts
 	func classTokens() -> [String] {
-		return self.constructTokens("public class")
+		return Array(self.constructTokens("public class"))
 	}
 
 	func enumTokens() -> [String] {
-		return self.constructTokens("public enum")
+		return Array(self.constructTokens("public enum"))
 	}
 
 	func structTokens() -> [String] {
-		return self.constructTokens("public struct")
+		return Array(self.constructTokens("public struct"))
 	}
 
 	func extensionTokens() -> [String] {
-		return self.constructTokens("extension")
+		return Array(self.constructTokens("extension"))
 	}
 
-	func constructTokens(preIdentifer:String) -> [String] {
+	func constructTokens(preIdentifer:String) -> Set<String> {
 		let rawTokens = NSRegularExpression.matchesForRegexInText("\(preIdentifer) [A-Z]+[a-z || A-Z]*", text: self)
-		var returnArray = [String]()
+		var returnSet = Set<String>()
 		for token in rawTokens {
-			returnArray.append(token.characters.split{$0 == " "}.map(String.init)[preIdentifer.componentsSeparatedByString(" ").count])
+			returnSet.insert(token.characters.split{$0 == " "}.map(String.init)[preIdentifer.componentsSeparatedByString(" ").count])
 		}
-		return returnArray
+		print("tokens - \(returnSet)")
+
+		return returnSet
 	}
 
 	//Properties
@@ -128,9 +130,7 @@ extension String {
 
 		return returnArray
 	}
-
-
-
+	
 	func parsePrimaryCodeBlocks() -> [(name:String, code:String)] {
 		let eachLetter = self.characters
 		var currentBlock:String = ""
