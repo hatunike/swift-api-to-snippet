@@ -45,7 +45,6 @@ extension String {
 		for token in rawTokens {
 			returnSet.insert(token.characters.split{$0 == " "}.map(String.init)[preIdentifer.componentsSeparatedByString(" ").count])
 		}
-		print("tokens - \(returnSet)")
 
 		return returnSet
 	}

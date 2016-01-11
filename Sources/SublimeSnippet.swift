@@ -79,10 +79,10 @@ public class SublimeSnippet {
 			 for snippet in snippets {
 			 	switch snippet.snippetType {
 			 		case .Constant, .Variable, .ClassToken, .EnumToken, .StructToken:
-			 			comp += "{ \"trigger\": \"\(snippet.name) \\t \(snippet.description)\", \"contents\": \"\(snippet.name)\" },"
+			 			comp += "{ \"trigger\": \"\(snippet.name.removeParenthesis()) \\t \(snippet.description.removeParenthesis())\", \"contents\": \"\(snippet.name)\" },"
 			 		case .InstanceMethod, .ClassMethod, .StaticMethod, .InitializationMethod:
-			 			comp += "{ \"trigger\": \"\(snippet.name.removeGreaterThanLessThan())"
-			 			comp += " \\t \(snippet.description)\" ,"
+			 			comp += "{ \"trigger\": \"\(snippet.name.removeGreaterThanLessThan().removeParenthesis())"
+			 			comp += " \\t \(snippet.description.removeParenthesis())\" ,"
 			 			comp += " \"contents\": \"\(snippet.name.removeGreaterThanLessThan().removeParenthesis())("
 			 			if snippet.parameters.count == 0 {
 							comp = comp + ")\" },"
@@ -90,13 +90,13 @@ public class SublimeSnippet {
 							for index in 1...snippet.parameters.count {
 								let param = snippet.parameters[index-1]
 
-								comp = comp + SublimeSnippet.paramSnippet(param, paramNum:index).removeGreaterThanLessThan()
+								comp = comp + SublimeSnippet.paramSnippet(param, paramNum:index)
 
 								if index != snippet.parameters.count {
 									if snippet.parameters.count != 1 {
 										comp = comp + ", "
 									} else {
-										comp = comp + ")"
+										//comp = comp + ""
 									}
 								} else {
 									comp = comp + ")\" },"
@@ -185,69 +185,6 @@ public class SublimeSnippet {
 		}
 	}
 
-	class func processSwiftFiles(files:[String], sourcePath:String, outputPath:String) {
-        for swiftFile in files {
-            let fullFilePath = "\(sourcePath)/\(swiftFile)"
-            if let fileTxt = File.open(fullFilePath) {
-                let blocks = fileTxt.parsePrimaryCodeBlocks()
-                for (name, code) in blocks {
-                    //print("processing \(name) : \(fullFilePath)")
-
-                    for token in fileTxt.classTokens() {
-                        let fileName = File.filePathForNewFile(outputPath, fileName:token)
-                        File.save(fileName, SublimeSnippet.createSnippetText(with:token))
-                    }
-
-                    for token in fileTxt.enumTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName(token).removeUnsafeSublimeTextCharacters())"
-                        File.save(fileName, SublimeSnippet.createSnippetText(with:token))
-                    }
-
-                    for token in fileTxt.structTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName(token).removeUnsafeSublimeTextCharacters())"
-                        File.save(fileName, SublimeSnippet.createSnippetText(with:token))
-                    }
-
-                    for (key, value) in fileTxt.variableTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName(key).removeUnsafeSublimeTextCharacters())"
-                        File.save(fileName, SublimeSnippet.createSnippetText(with:key, textDescription:value))
-                    }
-
-                    for (key, value) in fileTxt.constantTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName(key).removeUnsafeSublimeTextCharacters())"
-                        File.save(fileName, SublimeSnippet.createSnippetText(with:key, textDescription:value))
-                    }
-
-                    for funcData:FuncData in code.memberFuncParserTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName("\(name)-\(funcData.name.removeUnsafeSublimeTextCharacters())"))"
-                        File.save(fileName, SublimeSnippet.createFuncSnippetText(with:funcData.name, parameters:funcData.params, returnType:"func \(name) -> \(funcData.returnType)"))          
-                    }
-
-                    for funcData:FuncData in code.classFuncTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName("\(name)-\(funcData.name.removeUnsafeSublimeTextCharacters())"))"
-                        File.save(fileName, SublimeSnippet.createFuncSnippetText(with:"\(name).\(funcData.name)", parameters:funcData.params, returnType:"class \(name) -> \(funcData.returnType)"))          
-                    }
-
-                    for funcData:FuncData in code.staticFuncTokens() {
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName("\(name)-\(funcData.name.removeUnsafeSublimeTextCharacters())"))"
-                        File.save(fileName, SublimeSnippet.createFuncSnippetText(with:"\(name).\(funcData.name)", parameters:funcData.params, returnType:"static \(name) -> \(funcData.returnType)"))          
-                    }
-
-                    for funcData:FuncData in code.initializerTokens() {
-                        let unsafeChars = NSCharacterSet.alphanumericCharacterSet().invertedSet
-                        let paramIdentifer = funcData.params.joinWithSeparator("-").componentsSeparatedByCharactersInSet(unsafeChars).joinWithSeparator("")
-                        let descriptionIdentifier = funcData.params.map({param in "\(SublimeSnippet.harvestParamExternalName(param, isFirstParam:false))"}).joinWithSeparator(" ")
-                        let fileName = "\(outputPath)/\(SublimeSnippet.snippetClassFileName("\(name)-\(funcData.name.removeUnsafeSublimeTextCharacters())-\(paramIdentifer.removeUnsafeSublimeTextCharacters())"))"
-                        File.save(fileName, SublimeSnippet.createFuncSnippetText(with:"\(name)", parameters:funcData.params, returnType:"\(descriptionIdentifier)"))         
-                    }
-
-                }
-            } else {
-                print("failed to open file \(swiftFile)")
-            }
-        }
-    }
-
     class func convertSwiftFilesToSnippets(files:[String], sourcePath:String, outputPath:String) -> Set<Snippet> {
     	var snippets = Set<Snippet>()
 
@@ -289,18 +226,18 @@ public class SublimeSnippet {
                     }
 
                     for funcData:FuncData in code.classFuncTokens() {
-                    	let snip = Snippet(name:funcData.name, description:"class \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.ClassMethod)
+                    	let snip = Snippet(name:"\(name).\(funcData.name)", description:"class \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.ClassMethod)
               			snippets.insert(snip)          
                     }
                       
                     for funcData:FuncData in code.staticFuncTokens() {
-                    	let snip = Snippet(name:funcData.name, description:"static \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.StaticMethod)
+                    	let snip = Snippet(name:"\(name).\(funcData.name)", description:"static \(name) -> \(funcData.returnType)", parameters:funcData.params, snippetType:.StaticMethod)
               			snippets.insert(snip)          
                     }
 					
                     for funcData:FuncData in code.initializerTokens() {
                         let descriptionIdentifier = funcData.params.map({param in "\(SublimeSnippet.harvestParamExternalName(param, isFirstParam:false))"}).joinWithSeparator(" ")
-                        let snip = Snippet(name:name, description:descriptionIdentifier, parameters:funcData.params, snippetType:.InitializationMethod)
+                        let snip = Snippet(name:"\(name)", description:descriptionIdentifier, parameters:funcData.params, snippetType:.InitializationMethod)
               			snippets.insert(snip)
                     } 
                 }

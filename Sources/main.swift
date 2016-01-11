@@ -26,7 +26,12 @@ if Process.arguments.count == 1 {
     let enumerator:NSDirectoryEnumerator = filemanager.enumeratorAtPath(sourcePath)!
     let swiftFiles = enumerator.allObjects.filter(){ $0.pathExtension == "swift" }
 
-    SublimeSnippet.processSwiftFiles(swiftFiles as! [String], sourcePath:sourcePath, outputPath:outputPath)
+if let completionFileName = sourcePath.componentsSeparatedByString("/").last {
+        let snippets = SublimeSnippet.convertSwiftFilesToSnippets(swiftFiles as! [String], sourcePath:sourcePath, outputPath:outputPath)
+        SublimeSnippet.createCompletionFile(completionFileName, snippets:snippets, sourcePath:sourcePath, outputPath:outputPath)
+    } else {
+        print("unable to obtain a name from the last path component in the sourcePath")
+    }
    
 } else {
     print("No directory given")
