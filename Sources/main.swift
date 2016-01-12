@@ -14,7 +14,7 @@ if Process.arguments.count == 1 {
     let swiftFiles = enumerator.allObjects.filter(){ $0.pathExtension == "swift" }
     if let completionFileName = sourcePath.componentsSeparatedByString("/").last {
         let snippets = SublimeSnippet.convertSwiftFilesToSnippets(swiftFiles as! [String], sourcePath:sourcePath, outputPath:"\(path)/snippets/")
-        SublimeSnippet.createCompletionFile(completionFileName, snippets:snippets, sourcePath:sourcePath, outputPath:"\(path)/snippets/")
+        Completion.createCompletionFile(completionFileName, snippets:snippets, sourcePath:sourcePath, outputPath:"\(path)/snippets/")
     } else {
         print("unable to obtain a name from the last path component in the sourcePath")
     }
@@ -28,7 +28,7 @@ if Process.arguments.count == 1 {
 
 if let completionFileName = sourcePath.componentsSeparatedByString("/").last {
         let snippets = SublimeSnippet.convertSwiftFilesToSnippets(swiftFiles as! [String], sourcePath:sourcePath, outputPath:outputPath)
-        SublimeSnippet.createCompletionFile(completionFileName, snippets:snippets, sourcePath:sourcePath, outputPath:outputPath)
+        Completion.createCompletionFile(completionFileName, snippets:snippets, sourcePath:sourcePath, outputPath:outputPath)
     } else {
         print("unable to obtain a name from the last path component in the sourcePath")
     }
