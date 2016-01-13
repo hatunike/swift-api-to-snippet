@@ -21,7 +21,7 @@ class File {
     }
 
     class func filePathForNewFile(basePath:String, fileName:String) -> String {
-        return "\(basePath)/\(SublimeSnippet.snippetClassFileName(fileName).removeUnsafeSublimeTextCharacters())"
+        return "\(basePath)/\(SnippetFormat.snippetClassFileName(fileName).removeUnsafeSublimeTextCharacters())"
     }
 
     class func filePathForCompletionFile(basePath:String) -> String {

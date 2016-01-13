@@ -22,7 +22,7 @@ class Completion {
 							for index in 1...snippet.parameters.count {
 								let param = snippet.parameters[index-1]
 
-								comp = comp + SublimeSnippet.paramSnippet(param, paramNum:index)
+								comp = comp + SnippetFormat.paramSnippet(param, paramNum:index)
 
 								if index != snippet.parameters.count {
 									if snippet.parameters.count != 1 {

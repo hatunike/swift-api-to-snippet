@@ -2,19 +2,19 @@ import Foundation
 
 public class SublimeSnippet {
 	class func createSnippetText(with inputText:String, textDescription:String = "") -> String {
-		return "\(SublimeSnippet.snippet().start)" +
-				"\(SublimeSnippet.content().start)" +
+		return "\(SnippetFormat.snippet().start)" +
+				"\(SnippetFormat.content().start)" +
 				"\(inputText)\n" +
-				"\(SublimeSnippet.content().end)" +
-				"\(SublimeSnippet.tabTrigger(inputText))" +
-				"\(SublimeSnippet.scope())" + 
-				"\(SublimeSnippet.descriptionText(textDescription))" +
-				"\(SublimeSnippet.snippet().end)"				
+				"\(SnippetFormat.content().end)" +
+				"\(SnippetFormat.tabTrigger(inputText))" +
+				"\(SnippetFormat.scope())" + 
+				"\(SnippetFormat.descriptionText(textDescription))" +
+				"\(SnippetFormat.snippet().end)"				
 	}
 
 	class func createFuncSnippetText(with name:String, parameters:[String], returnType:String) -> String {
-		var snippet = "\(SublimeSnippet.snippet().start)" +
-					  "\(SublimeSnippet.content().start)" +
+		var snippet = "\(SnippetFormat.snippet().start)" +
+					  "\(SnippetFormat.content().start)" +
 					  "\(name.escapeGreaterThanLessThan().removeParenthesis())("
 		if parameters.count == 0 {
 			snippet = snippet + ")"
@@ -22,7 +22,7 @@ public class SublimeSnippet {
 			for index in 1...parameters.count {
 				let param = parameters[index-1]
 
-				snippet = snippet + SublimeSnippet.paramSnippet(param, paramNum:index)
+				snippet = snippet + SnippetFormat.paramSnippet(param, paramNum:index)
 
 				if index != parameters.count {
 					if parameters.count != 1 {
@@ -36,11 +36,11 @@ public class SublimeSnippet {
 			}
 		}
 
-		snippet = snippet + "\(SublimeSnippet.content().end)" +
-				"\(SublimeSnippet.tabTrigger(name.stringByReplacingOccurrencesOfString("<", withString: "").stringByReplacingOccurrencesOfString(">", withString: "")))" +
-				"\(SublimeSnippet.scope())" + 
-				"\(SublimeSnippet.descriptionText(returnType))" +
-				"\(SublimeSnippet.snippet().end)"
+		snippet = snippet + "\(SnippetFormat.content().end)" +
+				"\(SnippetFormat.tabTrigger(name.stringByReplacingOccurrencesOfString("<", withString: "").stringByReplacingOccurrencesOfString(">", withString: "")))" +
+				"\(SnippetFormat.scope())" + 
+				"\(SnippetFormat.descriptionText(returnType))" +
+				"\(SnippetFormat.snippet().end)"
 
 		return snippet
 	}
