@@ -37,7 +37,7 @@ public class SublimeSnippet {
 		}
 
 		snippet = snippet + "\(SnippetFormat.content().end)" +
-				"\(SnippetFormat.tabTrigger(name.stringByReplacingOccurrencesOfString("<", withString: "").stringByReplacingOccurrencesOfString(">", withString: "")))" +
+				"\(SnippetFormat.tabTrigger(name.removeGreaterThanLessThan()))" +
 				"\(SnippetFormat.scope())" + 
 				"\(SnippetFormat.descriptionText(returnType))" +
 				"\(SnippetFormat.snippet().end)"
