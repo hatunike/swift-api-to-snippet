@@ -1,4 +1,4 @@
-# Swift API To Snippet
+# Swift API to Sublime-Completion
 A command line tool for parsing swift files in a directory and outputting a `.sublime-completions` file. This json file can then be used by Sublime Text to give completion suggestions.
 
 ![Alt text](/sample-images/stringByReplacing.png)
