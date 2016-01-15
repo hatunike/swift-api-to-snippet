@@ -1,80 +1,94 @@
 # Swift API To Snippet
-A command line tool for parsing swift files in a directory and outputting autocompletion snippets
+A command line tool for parsing swift files in a directory and outputting a `.sublime-completions` file. This json file can then be used by Sublime Text to give completion suggestions.
+
+![Alt text](/sample-images/stringByReplacing.png)
+
+tabs for quicker completion
+
+![Alt text](/sample-images/datetime1.png)  
+![Alt text](/sample-images/datetime2.png)  
+![Alt text](/sample-images/datetime3.png)  
+![Alt text](/sample-images/datetime4.png) 
+
+
 
 ## Getting Started
 
 `swift build`
 
-`.build/debug/SwiftAPIToSnippet /Path/To/SwiftFolder/`
+`.build/debug/SwiftAPIToSnippet sourcePath`
 
-Optionally,
+`sourcePath` here means the absolute url to the folder containing all the `.swift` files that will be processed. Currently only public api will be included in the completion file (see the roadmap below). 
 
-`.build/debug/SwiftAPIToSnippet /Path/To/SwiftFolder/ Path/To/DesiredOutputFolder`
+Optionally, you may pass in an outputPath as the 2nd parameter:
 
-The tool finds all .swift files in the given directory, it then parses the files, generating snippet files for all public facing api's.
+`.build/debug/SwiftAPIToSnippet sourcePath outputPath`
 
-The snippets can then be added to Sublime Text's package folder for autocompletion. This utility has been used to parse the [Swift Foundation Framework](https://github.com/apple/swift-corelibs-foundation) and create a [Sublime Text plugin for autocompletion](https://github.com/hatunike/Swift-Foundation-Sublime-Autocomplete-Package) 
+The `.sublime-completions` file is similar to the `.sublime-snippet`, but they are different in key ways. The completion file is .json structure intended for facilitating a large number of completions. While the snippet is for a single snippet. The intention is to support outputing both types of files. Currently only `.sublime-completions` are supported.
 
-## Public API
-Only public api's are converted to Snippets.
+The completion file will be output to either the "snippets" folder in the project or in the output path provided. This file can then be added to a Sublime Text's package folder. Now you have completion snippets. This utility has been used to parse the [Swift Foundation Framework](https://github.com/apple/swift-corelibs-foundation) and create a [Sublime Text plugin for completion](https://github.com/hatunike/Swift-Foundation-Sublime-Autocomplete-Package) 
+
+
+### General Format
+
+The completion file generated will look something like this :
+
+    {
+      "scope": "source.swift",
+      "completions": [
+      //tons of trigger/contents for Methods, Declarations & Properties
+      ]
+    }
+
 
 ### Methods (Class, Static, Instance, Initializer)
 
 public class & static methods will be translated into a snippet like :
 
-    <snippet>
-        <content><![CDATA[
-    NSCalendar.currentCalendar(${1:})]]></content>
-        <tabTrigger>NSCalendar.currentCalendar</tabTrigger>
-        <scope>source.swift</scope> <description>class NSCalendar -> NSCalendar</description></snippet>
+    {
+      "trigger": "NSURL.fileURLWithPathComponents \t class NSURL -> NSURL?",
+      "contents": "NSURL.fileURLWithPathComponents(${1:[String]})"
+    }
  
-where description shows the class, struct, or enum that the method belongs to as well as the return type of the method. Parameters are tabbed for easy autocompletion.
+the `trigger` includes the keys for triggering the completion. The `\t` is what determines the hint field in Sublime Text's completion window. Here it shows the class, struct, or enum that the method belongs to as well as the return type of the method. Parameters are tabbed for for ease.
 
 public instance methods will be translated into a snippet like :
 
-    <snippet>
-        <content><![CDATA[
-    containsString(${1:String})]]></content>
-        <tabTrigger>containsString</tabTrigger>
-        <scope>source.swift</scope> <description>func NSString -> Bool</description></snippet>
+    {
+      "trigger": "containsString \t func NSString -> Bool",
+      "contents": "containsString(${1:String})"
+    },
 
-where description shows the class, struct or enum that the method belongs to as well as the return type of the method. Parameters are tabbed for easy autocompletion. Placeholder text is the expected type.
+where `\t` shows the class, struct or enum that the method belongs to as well as the return type of the method. Parameters are tabbed for easy autocompletion. Placeholder text is the expected type.
 
 public initializers will be translated into a snippet like :
 
-    <snippet>
-        <content><![CDATA[
-    NSAttributedString(string:${1:String}, attributes:${2:[String })]]></content>
-        <tabTrigger>NSAttributedString</tabTrigger>
-        <scope>source.swift</scope> <description>string: attributes:</description></snippet>
+    {
+      "trigger": "NSAttributedString \t string: attributes:",
+      "contents": "NSAttributedString(string:${1:String}, attributes:${2:[String })"
+    }
 
-where description shows the parameters of the initializers. 
+where `\t` shows the parameters of the initializers. 
 
 ### Declarations (Class, Struct, Enum)
 
 public declarations will be translated into a snippet like :  
 
-    <snippet>
-        <content><![CDATA[
-    NSDate
-    ]]></content>
-        <tabTrigger>NSDate</tabTrigger>
-        <scope>source.swift</scope>
-        <description></description>
-    </snippet>
+    {
+      "trigger": "NSDate \t NSDate",
+      "contents": "NSDate"
+    },
 
 ### Properties (Variable, Constant)
 
 public properties will be translated into a snippet like :
 
-    <snippet>
-        <content><![CDATA[
-    count
-    ]]></content>
-        <tabTrigger>count</tabTrigger>
-        <scope>source.swift</scope> <description>Int</description></snippet>
+    {
+      "trigger": "count \t Int",
+      "contents": "count"
+    }
 
-Where description here refers to the type of the property.
+Where `\t` here refers to the type of the property.
 
 
 ##Version 1.0 Roadmap
