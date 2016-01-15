@@ -3,13 +3,7 @@ A command line tool for parsing swift files in a directory and outputting a `.su
 
 ![Alt text](/sample-images/stringByReplacing.png)
 
-tabs for quicker completion
-
-![Alt text](/sample-images/datetime1.png)  
-![Alt text](/sample-images/datetime2.png)  
-![Alt text](/sample-images/datetime3.png)  
-![Alt text](/sample-images/datetime4.png) 
-
+(This is an example of the completion file in action. The completion file here was generated from the open source swift foundation framework)
 
 
 ## Getting Started
