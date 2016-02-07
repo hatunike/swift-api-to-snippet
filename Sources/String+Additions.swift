@@ -23,4 +23,6 @@ extension String {
 	public func removeUnsafeSublimeTextCharacters() -> String {
 		return self.stringByReplacingOccurrencesOfString("*", withString:"pointer").stringByReplacingOccurrencesOfString(".", withString:"-").stringByReplacingOccurrencesOfString("=", withString:"equals").stringByReplacingOccurrencesOfString("+", withString:"plus").stringByReplacingOccurrencesOfString("/", withString:"slash").stringByReplacingOccurrencesOfString("_", withString:"-")
 	}
+	
+	
 }
